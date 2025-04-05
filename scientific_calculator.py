@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import math
 
 class ScientificCalculator:
@@ -104,25 +104,52 @@ class ScientificCalculator:
     def function_click(self, func):
         try:
             current = float(self.result_var.get())
+            result = None
+            error_msg = None
+
             if func == 'sin':
                 result = math.sin(math.radians(current))
             elif func == 'cos':
                 result = math.cos(math.radians(current))
             elif func == 'tan':
-                result = math.tan(math.radians(current))
+                if abs(math.cos(math.radians(current))) < 1e-10:
+                    error_msg = "탄젠트 함수 정의되지 않음"
+                else:
+                    result = math.tan(math.radians(current))
             elif func == 'log':
-                result = math.log10(current)
+                if current <= 0:
+                    error_msg = "로그함수의 정의역은 양수"
+                else:
+                    result = math.log10(current)
             elif func == 'ln':
-                result = math.log(current)
+                if current <= 0:
+                    error_msg = "자연로그함수의 정의역은 양수"
+                else:
+                    result = math.log(current)
             elif func == 'x²':
                 result = current ** 2
             elif func == '√':
-                result = math.sqrt(current)
+                if current < 0:
+                    error_msg = "제곱근의 정의역은 0 이상"
+                else:
+                    result = math.sqrt(current)
             elif func == '1/x':
-                result = 1 / current
+                if abs(current) < 1e-10:
+                    error_msg = "0으로 나눌 수 없음"
+                else:
+                    result = 1 / current
             
-            self.result_var.set(str(result))
-        except:
+            if error_msg:
+                messagebox.showerror("Error", error_msg)
+                self.result_var.set("Error")
+            else:
+                self.result_var.set(str(result))
+                
+        except ValueError as e:
+            messagebox.showerror("Error", "잘못된 입력값")
+            self.result_var.set("Error")
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
             self.result_var.set("Error")
     
     def constant_click(self, const):
@@ -156,7 +183,11 @@ class ScientificCalculator:
             expression = expression.replace('e', str(math.e))
             result = eval(expression)
             self.result_var.set(str(result))
-        except:
+        except ZeroDivisionError:
+            messagebox.showerror("Error", "0으로 나눌 수 없습니다")
+            self.result_var.set("Error")
+        except Exception as e:
+            messagebox.showerror("Error", "잘못된 수식입니다")
             self.result_var.set("Error")
 
 if __name__ == "__main__":
